@@ -1,12 +1,15 @@
-module spi_slave(input clk, input rst, input ss, input mosi, output miso, input sck, output done, input [7:0] din, output [7:0] dout);
+module spi_slave(input clk, input rst, input ss, input mosi, output miso, input sck, output done, input [bc-1:0] din, output [bc-1:0] dout);
+parameter bc=8;	// bit count
+parameter counter_bits = 6;
+	
 reg mosi_d, mosi_q;
 reg ss_d, ss_q;
 reg sck_d, sck_q;
 reg sck_old_d, sck_old_q;
-reg [7:0] data_d, data_q;
+reg [bc-1:0] data_d, data_q;
 reg done_d, done_q;
-reg [2:0] bit_ct_d, bit_ct_q;
-reg [7:0] dout_d, dout_q;
+reg [counter_bits-1:0] bit_ct_d, bit_ct_q;
+reg [bc-1:0] dout_d, dout_q;
 reg miso_d, miso_q;
 
 assign miso = miso_q;
@@ -24,20 +27,20 @@ always @(*) begin
 	bit_ct_d = bit_ct_q;
 	dout_d = dout_q;
 	if (ss_q) begin	// if slave select is high (deselcted)
-		bit_ct_d = 3'b0; // reset bit counter
+		bit_ct_d = 0; // reset bit counter
 		data_d = din; // read in data
-		miso_d = data_q[7]; // output MSB
+		miso_d = data_q[bc-1]; // output MSB
 	end else begin // else slave select is low (selected)
 		if (!sck_old_q && sck_q) begin // rising edge
-			data_d = {data_q[6:0], mosi_q}; // read data in and shift
+			data_d = {data_q[bc-2:0], mosi_q}; // read data in and shift
 			bit_ct_d = bit_ct_q + 1'b1; // increment the bit counter
-			if (bit_ct_q == 3'b111) begin // if we are on the last bit
-				dout_d = {data_q[6:0], mosi_q}; // output the byte
+			if (bit_ct_q == bc-1) begin // if we are on the last bit
+				dout_d = {data_q[bc-2:0], mosi_q}; // output the byte
 				done_d = 1'b1; // set transfer done flag
 				data_d = din; // read in new byte
 			end
 		end else if (sck_old_q && !sck_q) begin // falling edge
-			miso_d = data_q[7]; // output MSB
+			miso_d = data_q[bc-1]; // output MSB
 		end
 	end
 end

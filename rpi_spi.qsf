@@ -62,8 +62,6 @@ set_location_assignment PIN_99 -to miso
 set_location_assignment PIN_98 -to mosi
 set_location_assignment PIN_97 -to sck
 set_location_assignment PIN_1 -to sw
-set_global_assignment -name VERILOG_FILE spi_slave_simpler.v
-set_global_assignment -name VERILOG_FILE spi_slave_simpler2.v
 set_location_assignment PIN_84 -to done
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to sw
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to cs
